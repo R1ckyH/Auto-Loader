@@ -73,7 +73,7 @@ def get_dlls(exe_path, exe_args):
     print("[info]: Starting Procmon.exe......")
     cmd = proc_cmd_base + proc_cmd_run
     subprocess.Popen(cmd)
-    time.sleep(3)
+    time.sleep(4)
 
     print(f"[info]: Starting {exe_path} with args: {exe_args}")
     target = subprocess.Popen([exe_path] + exe_args)

@@ -38,7 +38,7 @@ def gen_hacked_dll(functions, dll, hack_function, hack_lib, vcvar_bat):
     print(f"[info]: Creating new dll to /out/{dll}")
     cpp_path = gen_code(functions, dll, hack_function, hack_lib)
     os.chdir("temp")
-    subprocess.run([vcvar_bat, "&&", "cl", "/LD", os.path.basename(cpp_path), "/link", f"/OUT:../out/{dll}"], shell=True)
+    subprocess.run([vcvar_bat, "&&", "cl", "/EHsc", "/LD", os.path.basename(cpp_path), "/link", f"/OUT:../out/{dll}"], shell=True)
     print(f"[info]: Compiled new dll to /out/{dll}")
     os.chdir("../")
     return cpp_path

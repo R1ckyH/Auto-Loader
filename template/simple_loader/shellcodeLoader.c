@@ -16,10 +16,13 @@ int hack() {
 
     RtlMoveMemory(addressPointer, sc, length+1);
 
-    void* handle = CreateThread(NULL, 0, (void*)addressPointer, NULL, 0, 0);
+    //void* handle = CreateThread(NULL, 0, (void*)addressPointer, NULL, 0, 0);
+    HANDLE handle = CreateThread(NULL, 0,
+        (LPTHREAD_START_ROUTINE)addressPointer,  // modify to c++
+        NULL, 0, NULL);
 
     Sleep(3000);
     WaitForSingleObject(handle, INFINITE);
-
+    Sleep(10000);
     return 0;
 }

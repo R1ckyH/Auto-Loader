@@ -2,7 +2,7 @@
     "vcvar_bat": "D:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat",
     "exe_path": "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\wpr.exe",
     "exe_args": ["/start"],
-    "hack_lib": "./template/simple_loader/shellcodeLoader.c",
-    "hack_extra_files": ["./payload/calculator/payload.bin"],
+    "template": "./template/simple_loader/",
+    "payload": ["./payload/calculator/payload.bin"],
     "run": false
 }

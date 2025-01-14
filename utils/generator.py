@@ -38,15 +38,20 @@ def gen_hacked_dll(functions, dll, hack_function, hack_lib, vcvar_bat):
     print(f"[info]: Creating new dll to /out/{dll}")
     cpp_path = gen_code(functions, dll, hack_function, hack_lib)
     os.chdir("temp")
-    subprocess.run([vcvar_bat, "&&", "cl", "/EHsc", "/LD", os.path.basename(cpp_path), "/link", f"/OUT:../out/{dll}"], shell=True)
+    command = [vcvar_bat, "&&", "cl", "/EHsc", "/LD", os.path.basename(cpp_path), "/link", f"/OUT:../out/{dll}"]
+    print(f"[info]: Compiling with command: {' '.join(command)}")
+    subprocess.run(command, shell=True)
     print(f"[info]: Compiled new dll to /out/{dll}")
     os.chdir("../")
     return cpp_path
 
 
-def export_out(hack_extra_files, exe_tmep):
-    hack_extra_files.append(exe_tmep)
-    for file in hack_extra_files:
+def export_out(extra_files, files, template_path):
+    for i in range(len(extra_files)):
+        extra_files[i] = template_path + extra_files[i]
+
+    extra_files += files
+    for file in extra_files:
         shutil.copy(file, f"out/{os.path.basename(file)}")
         print(f"[info]: Exported /out/{os.path.basename(file)}")
 

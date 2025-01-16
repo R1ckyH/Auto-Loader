@@ -24,6 +24,19 @@ def scan_exe_functions(path, dll):
     return functions
 
 
+def select_scanned_dlls(dlls):
+    option = -1
+    while option < 1 or option > len(dlls):
+        print(f"[info] Please select dll from")
+        for i in range(len(dlls)):
+            print(f"{i + 1}: {dlls[i]}")
+        try:
+            option = int(input("Select dll number: "))
+        except ValueError:
+            option = -1
+    return dlls[option - 1]
+
+
 def behavior_analyze(path, args, functions):
     print(f"[info]: Behavior Analyzing of {os.path.basename(path)}")
     p = subprocess.run([path] + args, capture_output=True, text=True)
@@ -45,11 +58,13 @@ if __name__ == "__main__":
         with open("config.json", "r") as f:
             data = json.load(f)
         dlls = get_dlls(data["exe_path"], data["exe_args"])
-        functions = scan_exe_functions(data["exe_path"], dlls[0])
-        gen_dll(functions, dlls[0])
+        dll = select_scanned_dlls(dlls)
+        functions = scan_exe_functions(data["exe_path"], dll)
+        gen_dll(functions, dll, data["vcvar_bat"])
         called_functions = behavior_analyze(f"./temp/{os.path.basename(data['exe_path'])}", data["exe_args"], functions)
         print(called_functions)
     except Exception:
         import traceback
+
         traceback.print_exc()
     input("Press enter to end the program......")

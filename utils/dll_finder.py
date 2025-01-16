@@ -47,12 +47,12 @@ def get_exe(path):
     return os.path.dirname(path), "./temp/" + os.path.basename(path)
 
 
-def get_fail_dll(log_path):
+def get_fail_dll(log_path, exe_name):
     dll_failures = set()
     with open(log_path, 'r') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            if ".dll" in row.get('Path', ''):
+            if ".dll" in row.get('Path', '') and exe_name == row.get('Process Name', ''):
                 path = row.get('Path', '')
                 if path.lower().endswith('.dll'):
                     dll_failures.add(path)
@@ -88,7 +88,7 @@ def get_dlls(exe_path, exe_args):
     subprocess.run(cmd)
 
     print(f"[info]: Finding dll from Log")
-    dll_failures = get_fail_dll(temp_log)
+    dll_failures = get_fail_dll(temp_log, os.path.basename(exe_path))
 
     if not dll_failures:
         print("No missing DLLs found, check the procmon run correctly or change the time for waiting the exe run")
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     try:
         with open("config.json", "r") as f:
             data = json.load(f)
-        get_dlls(data["exe_path"])
+        get_dlls(data["exe_path"], data["vcvar_bat"])
     except Exception:
         import traceback
 

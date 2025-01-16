@@ -22,10 +22,14 @@ def gen_code(functions, dll, hack_function="", hack_lib=""):
     return f"temp/{dll_name}.cpp"
 
 
-def gen_dll(functions, dll):
+def gen_dll(functions, dll, vcvar_bat):
     cpp_path = gen_code(functions, dll)
-    subprocess.run(["g++", "-shared", "-o", f"./temp/{dll}", cpp_path, "-O2", "-static-libgcc", "-static-libstdc++"])
+    os.chdir("temp")
+    # ["g++", "-shared", "-o", f"./temp/{dll}", cpp_path, "-O2", "-static-libgcc", "-static-libstdc++"]
+    command = [vcvar_bat, "&&", "cl", "/std:c++20", "/EHsc", "/LD", os.path.basename(cpp_path), "/link", f"/OUT:./{dll}"]
+    subprocess.run(command)
     print(f"[info]: Compiled new dll to /temp/{dll}")
+    os.chdir("../")
     return cpp_path
 
 
@@ -38,7 +42,7 @@ def gen_hacked_dll(functions, dll, hack_function, hack_lib, vcvar_bat):
     print(f"[info]: Creating new dll to /out/{dll}")
     cpp_path = gen_code(functions, dll, hack_function, hack_lib)
     os.chdir("temp")
-    command = [vcvar_bat, "&&", "cl", "/EHsc", "/LD", os.path.basename(cpp_path), "/link", f"/OUT:../out/{dll}"]
+    command = [vcvar_bat, "&&", "cl", "/std:c++20", "/EHsc", "/LD", os.path.basename(cpp_path), "/link", f"/OUT:../out/{dll}"]
     print(f"[info]: Compiling with command: {' '.join(command)}")
     subprocess.run(command, shell=True)
     print(f"[info]: Compiled new dll to /out/{dll}")

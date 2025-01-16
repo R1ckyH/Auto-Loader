@@ -14,7 +14,7 @@ def main():
 
     dlls = get_dlls(data["exe_path"], data["exe_args"])
     functions = scan_exe_functions(data["exe_path"], dlls[0])
-    gen_dll(functions, dlls[0])
+    gen_dll(functions, dlls[0], data["vcvar_bat"])
 
     called_functions = behavior_analyze(f"./temp/{os.path.basename(data['exe_path'])}", data["exe_args"], functions)
 

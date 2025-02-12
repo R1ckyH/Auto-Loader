@@ -1,4 +1,5 @@
 {
-    "hack_lib": "shellcodeLoader.c",
+    "hack_entry": "shellcodeLoader.c",
+    "hack_lib": [],
     "extra_files": []
 }

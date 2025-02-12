@@ -3,6 +3,8 @@ import shutil
 import subprocess
 import sys
 
+from lxml.isoschematron import extract_xsd
+
 
 def gen_code(functions, dll, hack_function="", hack_lib=""):
     dll_name = dll[:-4]
@@ -26,23 +28,27 @@ def gen_dll(functions, dll, vcvar_bat):
     cpp_path = gen_code(functions, dll)
     os.chdir("temp")
     # ["g++", "-shared", "-o", f"./temp/{dll}", cpp_path, "-O2", "-static-libgcc", "-static-libstdc++"]
-    command = [vcvar_bat, "&&", "cl", "/std:c++20", "/EHsc", "/LD", os.path.basename(cpp_path), "/link", f"/OUT:./{dll}"]
+    command = [vcvar_bat, "&&", "cl", "/std:c++20", "/EHsc", "/LD", os.path.basename(cpp_path), "/link",
+               f"/OUT:./{dll}"]
     subprocess.run(command)
     print(f"[info]: Compiled new dll to /temp/{dll}")
     os.chdir("../")
     return cpp_path
 
 
-def gen_hacked_dll(functions, dll, hack_function, hack_lib, vcvar_bat):
+def gen_hacked_dll(functions, dll, hack_function, hack_lib, extra_files, vcvar_bat):
     if not os.path.exists("out"):
         os.mkdir("out")
 
-    print(f"[info]: Copying {hack_lib} to /temp/{os.path.basename(hack_lib)}")
-    shutil.copy(hack_lib, f"./temp/{os.path.basename(hack_lib)}")
+    extra_files.append(hack_lib)
+    for file in extra_files:
+        print(f"[info]: Copying {file} to /temp/{os.path.basename(file)}")
+        shutil.copy(file, f"./temp/{os.path.basename(file)}")
     print(f"[info]: Creating new dll to /out/{dll}")
     cpp_path = gen_code(functions, dll, hack_function, hack_lib)
     os.chdir("temp")
-    command = [vcvar_bat, "&&", "cl", "/std:c++20", "/EHsc", "/LD", os.path.basename(cpp_path), "/link", f"/OUT:../out/{dll}"]
+    command = [vcvar_bat, "&&", "cl", "/std:c++20", "/EHsc", "/LD", os.path.basename(cpp_path), "/link",
+               f"/OUT:../out/{dll}"]
     print(f"[info]: Compiling with command: {' '.join(command)}")
     subprocess.run(command, shell=True)
     print(f"[info]: Compiled new dll to /out/{dll}")
@@ -50,15 +56,16 @@ def gen_hacked_dll(functions, dll, hack_function, hack_lib, vcvar_bat):
     return cpp_path
 
 
-def export_out(extra_files, files, template_path):
-    for i in range(len(extra_files)):
-        extra_files[i] = template_path + extra_files[i]
-
+def export_out(extra_files, files):
     extra_files += files
     for file in extra_files:
-        shutil.copy(file, f"out/{os.path.basename(file)}")
+        if os.path.isdir(file):
+            shutil.copytree(file, "out/", dirs_exist_ok=True)
+        else:
+            shutil.copy(file, f"out/{os.path.basename(file)}")
         print(f"[info]: Exported /out/{os.path.basename(file)}")
 
 
 if __name__ == "__main__":
-    gen_hacked_dll(["WPRCFormatError"], "WindowsPerformanceRecorderControl.dll", "WPRCFormatError", "D:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat")
+    gen_hacked_dll(["WPRCFormatError"], "WindowsPerformanceRecorderControl.dll", "WPRCFormatError",
+                   "D:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat")

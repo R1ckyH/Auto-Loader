@@ -95,18 +95,23 @@ def get_dlls(exe_path, exe_args):
         return
 
     print("\nMissing DLLs:")
+    dll_failures = list(set(dll_failures))
+    for i in range(len(dll_failures)):
+        dll_failures[i] = os.path.basename(dll_failures[i])
+
+    dll_failures = list(set(dll_failures))
     for dll in sorted(dll_failures):
         print(f"- {os.path.basename(dll)}")
 
-    dlls_copied = []
-    for dll in sorted(dll_failures):
-        try:
-            shutil.copy(original_path + "\\" + os.path.basename(dll), dll)
-            dlls_copied.append(os.path.basename(dll))
-            print(f"[info]: Copying {original_path}\\{os.path.basename(dll)} to {dll}")
-        except FileNotFoundError:
-            print(f"[Error]: Failed to copy {original_path}\\{os.path.basename(dll)} to {dll}")
-    return dlls_copied
+    #dlls_copied = []
+    #for dll in sorted(dll_failures):
+    #    try:
+    #        shutil.copy(original_path + "\\" + os.path.basename(dll), dll)
+    #        dlls_copied.append(os.path.basename(dll))
+    #        print(f"[info]: Copying {original_path}\\{os.path.basename(dll)} to {dll}")
+    #    except FileNotFoundError:
+    #        print(f"[Error]: Failed to copy {original_path}\\{os.path.basename(dll)} to {dll}")
+    return dll_failures
 
 
 if __name__ == "__main__":

@@ -4,5 +4,8 @@ __pycache__
 temp
 out
 
+template
+!template/simple_loader
+
 *test*
 *.zip

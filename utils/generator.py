@@ -36,9 +36,9 @@ def gen_dll(functions, dll, vcvar_bat):
     return cpp_path
 
 
-def gen_hacked_dll(functions, dll, hack_function, hack_entry, hack_lib, vcvar_bat):
-    if not os.path.exists(f"out"):
-        os.mkdir(f"out")
+def gen_hacked_dll(functions, dll, hack_function, hack_entry, hack_lib, vcvar_bat, template):
+    if not os.path.exists(f"out/{template}"):
+        os.mkdir(f"out/{template}")
 
     hack_lib.append(hack_entry)
     for file in hack_lib:
@@ -48,22 +48,22 @@ def gen_hacked_dll(functions, dll, hack_function, hack_entry, hack_lib, vcvar_ba
     cpp_path = gen_code(functions, dll, hack_function, hack_entry)
     os.chdir("temp")
     command = [vcvar_bat, "&&", "cl", "/std:c++20", "/EHsc", "/LD", os.path.basename(cpp_path), "/link",
-               f"/OUT:../out/{dll}"]
+               f"/OUT:../out/{template}/{dll}"]
     print(f"[info]: Compiling with command: {' '.join(command)}")
     subprocess.run(command, shell=True)
-    print(f"[info]: Compiled new dll to /out/{dll}")
+    print(f"[info]: Compiled new dll to /out/{template}/{dll}")
     os.chdir("../")
     return cpp_path
 
 
-def export_out(extra_files, files):
+def export_out(extra_files, files, template):
     extra_files += files
     for file in extra_files:
         if os.path.isdir(file):
-            shutil.copytree(file, "out/", dirs_exist_ok=True)
+            shutil.copytree(file, f"out/{template}/", dirs_exist_ok=True)
         else:
-            shutil.copy(file, f"out/{os.path.basename(file)}")
-        print(f"[info]: Exported /out/{os.path.basename(file)}")
+            shutil.copy(file, f"out/{template}/{os.path.basename(file)}")
+        print(f"[info]: Exported /out/{template}/{os.path.basename(file)}")
 
 
 if __name__ == "__main__":

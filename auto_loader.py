@@ -58,11 +58,10 @@ def main():
     for function in dll_functions:
         if dll_functions[function] == dll:
             functions.append(function)
-
-    gen_hacked_dll(functions, dll, hijacked_function, hack_entry, hack_lib, data["vcvar_bat"])
+    gen_hacked_dll(functions, dll, hijacked_function, hack_entry, hack_lib, data["vcvar_bat"], os.path.basename(os.path.dirname(data['template'])))
 
     files = [f"./temp/{os.path.basename(data['exe_path'])}"] + data["payload"]
-    export_out(extra_files, files)
+    export_out(extra_files, files, os.path.basename(os.path.dirname(data['template'])))
 
     if data["run"]:
         os.chdir("./out")

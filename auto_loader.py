@@ -31,8 +31,10 @@ def main():
     for function in called_functions:
         called_dll_functions.update({function: dll_functions[function]})
 
-    if len(called_dll_functions) > 0:
+    if len(called_dll_functions) > 1:
         hijacked_function, dll = select_scanned_functions(called_dll_functions)
+    elif len(called_dll_functions) == 1:
+        (hijacked_function, dll) = called_dll_functions.popitem()
     else:
         raise Exception("No functions selected")
 

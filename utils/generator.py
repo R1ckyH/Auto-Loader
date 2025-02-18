@@ -36,16 +36,16 @@ def gen_dll(functions, dll, vcvar_bat):
     return cpp_path
 
 
-def gen_hacked_dll(functions, dll, hack_function, hack_lib, extra_files, vcvar_bat):
-    if not os.path.exists("out"):
-        os.mkdir("out")
+def gen_hacked_dll(functions, dll, hack_function, hack_entry, hack_lib, vcvar_bat):
+    if not os.path.exists(f"out"):
+        os.mkdir(f"out")
 
-    extra_files.append(hack_lib)
-    for file in extra_files:
+    hack_lib.append(hack_entry)
+    for file in hack_lib:
         print(f"[info]: Copying {file} to /temp/{os.path.basename(file)}")
         shutil.copy(file, f"./temp/{os.path.basename(file)}")
     print(f"[info]: Creating new dll to /out/{dll}")
-    cpp_path = gen_code(functions, dll, hack_function, hack_lib)
+    cpp_path = gen_code(functions, dll, hack_function, hack_entry)
     os.chdir("temp")
     command = [vcvar_bat, "&&", "cl", "/std:c++20", "/EHsc", "/LD", os.path.basename(cpp_path), "/link",
                f"/OUT:../out/{dll}"]
